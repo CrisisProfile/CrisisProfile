@@ -1,0 +1,19 @@
+run.config:
+  engine: python
+  extra_packages:
+    - gdal-lib
+    - nginx
+data.db:
+  image: nanobox/postgresql:9.5
+  config:
+    extensions:
+      - uuid-ossp
+      - postgis
+web.main:
+  start:
+    nginx: nginx -c /app/etc/nginx.conf
+    django: gunicorn -c /app/etc/gunicorn.py crisisprofile.wsgi
+deploy.config:
+  before_live:
+    web.main:
+      - python manage.py migrate --fake-initial
