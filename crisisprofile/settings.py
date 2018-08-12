@@ -122,3 +122,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+SOCIAL_AUTH_TRAILING_SLASH = False                    # Remove end slash from routes
+SOCIAL_AUTH_AUTH0_DOMAIN = 'crisisprofile.auth0.com'
+SOCIAL_AUTH_AUTH0_KEY = os.environ.get("AUTH0_OAUTH_KEY")
+SOCIAL_AUTH_AUTH0_SECRET = os.environ.get("AUTH0_OAUTH_SECRET")
+AUTH0_MANAGEMENT_KEY = os.environ.get("AUTH0_MANAGEMENT_KEY")
+AUTH0_MANAGEMENT_SECRET = os.environ.get("AUTH0_MANAGEMENT_SECRET")
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SOCIAL_AUTH_AUTH0_SCOPE = [
+    'openid',
+    'profile'
+]
+
+AUTHENTICATION_BACKENDS = {
+    'crisisprofile.auth0backend.Auth0'
+}
+
+LOGIN_URL = "/login/auth0"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"

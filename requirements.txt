@@ -8,3 +8,6 @@ six==1.10.0
 requests
 gunicorn
 django-sslserver
+
+git+https://github.com/pythonwebcoder/social-core.git@d00a965905220b4f66791ecc0070019fe80965b2#egg=social-auth-core
+social-auth-app-django

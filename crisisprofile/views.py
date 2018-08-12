@@ -1,9 +1,25 @@
-from django.shortcuts import redirect, render
-from django.http import HttpResponse, JsonResponse
-import settings
-import requests
-from models import Profile
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import render
+from django.conf import settings
+
+import json
+from crisisprofile.models import Profile
+
+def convert(data):
+    if isinstance(data, bytes):
+        return data.decode('ascii')
+    if isinstance(data, dict):
+        return dict(map(convert, data.items()))
+    if isinstance(data, tuple):
+        return map(convert, data)
+
+    return data
+
+
+@require_http_methods(['GET'])
+def homepage(request):
+    return render(request, 'homepage.html')
 
 def get_profile(request, public_uuid):
     return render(request, 'profile.html', get_profile_data(public_uuid))
