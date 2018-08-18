@@ -20,6 +20,7 @@ from . import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^$', views.homepage),
     url(r'^profiles/(?P<public_uuid>[0-9a-f-]+)/', views.get_profile),
     url(r'^api/profiles/(?P<public_uuid>[0-9a-f-]+)/', views.api_get_profile),
     url(r'^', include('django.contrib.auth.urls', namespace='auth')),

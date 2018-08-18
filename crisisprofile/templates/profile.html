@@ -30,20 +30,15 @@ td, th {
 </head>
 <body>
   <h1><span>CrisisProfile</span> Cordinating the prevention, de-esclation, and long term stablization after a crisis</h1>
+  {{ user }}<a href="/logout">Logout</a>
   <h2>{{ identity.first_name }} {{ identity.middle_name }} {{ identity.last_name }} {{ identity.birthdate }}</h2>
-  <strong>Pronouns:</strong> {{ identity.pronouns }}<br/>
-  <h3>Explanation of CrisisProfile for frist time users</h3>
-  <p>Think of CrisisProfile as Facebook for people, animals, and groups in crisis or likely to be in crisis and their stakeholders. It is designed for life and death crises and applicable to any crisis such as those in business. It doesn't matter that you are struggling to apply a 300 page book to your life and work because CrisisProfile gives you just in time information in bite size pieces.</p>
-  <p><div style="display:inline;float:left;"><script src="//platform.linkedin.com/in.js" type="text/javascript"></script>
-<script type="IN/MemberProfile" data-id="https://www.linkedin.com/in/206tim" data-format="inline" data-related="false"></script></div> The founder of CrisisProfile is Tim Clemans (they/them/their), <a href="https://www.seattlepi.com/local/article/Space-Needle-record-holder-says-daily-trips-1412380.php">world record holder for most consecutive dialy visits to the Space Needle (158 days in a row)</a>, software developer of <a href="http://www.fammed.wisc.edu/files/webfm-uploads/documents/research/i-practise/ryan-perdue.pdf">medical records system SmallBrainRecords first version</a> and former Resident Hacker for Seattle Police featured in New York Times Magazine cover story Should We See Everything a Cop See? Tim founded CrisisProfile because Tim needed a system to coordinate recovery across stakeholders. Tim almost got locked up for 2+ years because of an alleged violation of a 2 year stay out of trouble court agreement. Local court asked mental health court to take over. However King County Mental Health Court deemed Tim too decompensated for their services due to eight suicide attempts in jail, large police responses prior to arrest and a very close attempt at suicide by cop on April 23rd. Thanks to an all team effort lead by Tim: Tim's attorneys, the judge in Tim's Burien Court cases, the prosectutor, Tim's parents, King County Crisis Line, Seattle Police, King County Mobile Crisis Team, Crisis Solutions Center, Chris Metcalf, Candace Faber, Paul Floyd, Michael Beebe. Tim is getting a this must go well second chance.</p>
-  <p><div style="display:inline;float:left;"><script src="//platform.linkedin.com/in.js" type="text/javascript"></script>
-<script type="IN/MemberProfile" data-id="https://www.linkedin.com/in/candacefaber" data-format="inline" data-related="false"></script></div>The CEO of CrisisProfile is Candace Faber (she/her), former diplomat  with the US State Department, former Civic Tech Advocate for the City of Seattle and currently guest faculty at University of Washington's Information School mentoring students on their campstone projects. Candace is no stanger to personal crises including being raped by a member of the Washington State legislature and had serious complications with mental health medications.</p>
+
 <h3>Status right now</h3>
 <strong>Is permanently housed?</strong> {{ status.is_permanently_housed }} <strong>Where right now?</strong> {{ status.where_right_now }} <strong>Where staying tonight?</strong> {{ status.where_staying_tonight }}
   <h3>Americans with Disabilities Act alerts</h3>
   <h3>Safety alert</h3>
   <p>{{ safety_alert }}</p>
-  <h3>Baseline behavior (what's normal for somebody)</h3>
+  <h3>Baseline behavior (what's normal this person)</h3>
   <h3>Stakeholders</h3>
   <div class="stakeholder"></div>
   <h3>Appointments</h3>

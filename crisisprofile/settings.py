@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crisisprofile',
-    'sslserver'
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -130,15 +130,17 @@ SOCIAL_AUTH_AUTH0_KEY = os.environ.get("AUTH0_OAUTH_KEY")
 SOCIAL_AUTH_AUTH0_SECRET = os.environ.get("AUTH0_OAUTH_SECRET")
 AUTH0_MANAGEMENT_KEY = os.environ.get("AUTH0_MANAGEMENT_KEY")
 AUTH0_MANAGEMENT_SECRET = os.environ.get("AUTH0_MANAGEMENT_SECRET")
+print('caution', SOCIAL_AUTH_AUTH0_SECRET)
 SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 SOCIAL_AUTH_AUTH0_SCOPE = [
     'openid',
     'profile'
 ]
 
-AUTHENTICATION_BACKENDS = {
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
     'crisisprofile.auth0backend.Auth0'
-}
+]
 
 LOGIN_URL = "/login/auth0"
 LOGIN_REDIRECT_URL = "/"

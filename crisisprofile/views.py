@@ -1,10 +1,18 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
 
 import json
 from crisisprofile.models import Profile
+
+def ensure_profile_exists(user):
+    profile_query = Profile.objects.filter(user=user)
+    print(profile_query)
+    if not profile_query:
+        profile = Profile(user=user, data={})
+        profile.save()
+
 
 def convert(data):
     if isinstance(data, bytes):
@@ -16,13 +24,21 @@ def convert(data):
 
     return data
 
+def get_public_uuid(user):
+    return Profile.objects.get(user=user).public_uuid
 
 @require_http_methods(['GET'])
 def homepage(request):
+
+    if request.user.is_authenticated():
+        ensure_profile_exists(request.user)
+        return redirect('profiles/%s' % (get_public_uuid(request.user)))
     return render(request, 'homepage.html')
+
 
 def get_profile(request, public_uuid):
     return render(request, 'profile.html', get_profile_data(public_uuid))
+
 
 def get_profile_data(public_uuid):
     profile = Profile.objects.filter(public_uuid=public_uuid)[0]

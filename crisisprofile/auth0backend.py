@@ -55,11 +55,11 @@ class Auth0(BaseOAuth2):
 
     def get_management_api_token(self):
 
-        payload = "{\"grant_type\":\"client_credentials\",\"client_id\": \"%s\",\"client_secret\": \"%s\",\"audience\": \"https://cisisprofile.auth0.com/api/v2/\"}" % (settings.AUTH0_MANAGEMENT_KEY, settings.AUTH0_MANAGEMENT_SECRET)
+        payload = "{\"grant_type\":\"client_credentials\",\"client_id\": \"%s\",\"client_secret\": \"%s\",\"audience\": \"https://crisisprofile.auth0.com/api/v2/\"}" % (settings.AUTH0_MANAGEMENT_KEY, settings.AUTH0_MANAGEMENT_SECRET)
 
         headers = { 'content-type': "application/json" }
 
-        response = requests.post("https://"+self.setting("SOCIAL_AUTH_AUTH0_KEY")+"/oauth/token", data=payload, headers=headers)
+        response = requests.post("https://crisisprofile.auth0.com/oauth/token", data=payload, headers=headers)
         print response.text
 
 
@@ -75,7 +75,7 @@ class Auth0(BaseOAuth2):
         token = self.get_management_api_token()
         headers = {'authorization': 'Bearer ' + token}
 
-        url = 'https://' + self.setting('DOMAIN') + userinfo['sub']
+        url = 'https://crisisprofile.auth0.com/api/v2/users/' + userinfo['sub']
         resp = requests.get(url, headers=headers)
         print 'all', resp.json().keys()
         print 'userinfo', userinfo
