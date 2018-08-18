@@ -19,3 +19,8 @@ class Profile(models.Model):
 
     def __str__(self):
         return "%s %s %s %s %s" % (self.public_uuid, self.data.get('identity', {}).get('first_name', ''), self.data.get('identity', {}).get('middle_name', ''), self.data.get('identity', {}).get('last_name', ''), self.data.get('identity', {}).get('birthdate', ''))
+
+class UserHasAccessTo(models.Model):
+    user = models.OneToOneField(User)
+    other = models.OneToOneField(User, related_name='other')
+    permissions = JSONField(default=[])
