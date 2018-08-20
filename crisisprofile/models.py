@@ -15,7 +15,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, unique=True, blank=True, null=True)
     private_uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     public_uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    data = JSONField(default={})
+    data = JSONField(default={}, blank=True, null=True)
 
     def __str__(self):
         return "%s %s %s %s %s" % (self.public_uuid, self.data.get('identity', {}).get('first_name', ''), self.data.get('identity', {}).get('middle_name', ''), self.data.get('identity', {}).get('last_name', ''), self.data.get('identity', {}).get('birthdate', ''))
@@ -24,3 +24,6 @@ class UserHasAccessTo(models.Model):
     user = models.OneToOneField(User)
     other = models.OneToOneField(User, related_name='other')
     permissions = JSONField(default=[])
+
+    def __str__(self):
+        return "%s %s" % (self.user.username, self.other.username)

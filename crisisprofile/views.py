@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 
 import json
-from crisisprofile.models import Profile
+from crisisprofile.models import Profile, UserHasAccessTo
 
 def ensure_profile_exists(user):
     profile_query = Profile.objects.filter(user=user)
@@ -37,7 +37,9 @@ def homepage(request):
 
 
 def get_profile(request, public_uuid):
-    return render(request, 'profile.html', get_profile_data(public_uuid))
+    data = get_profile_data(public_uuid)
+    data.update({'public_uuid': public_uuid})
+    return render(request, 'profile.html', data)
 
 
 def get_profile_data(public_uuid):
@@ -55,6 +57,27 @@ def get_profile_data(public_uuid):
                 del profile[key]
     return profile
 
+def get_public_uuid(user):
+    return Profile.objects.filter(user=user)[0].public_uuid
+
+def api_get_users_have_access_to(request):
+    users = [{'first_name': x.other.first_name, 'last_name': x.other.last_name, 'public_uuid': get_public_uuid(x.other)} for x in UserHasAccessTo.objects.filter(user=request.user)]
+    return JsonResponse(users, safe=False)
+
 def api_get_profile(request, public_uuid):
     profile = get_profile_data(public_uuid)
     return JsonResponse(profile, safe=False)
+
+def api_create_checklist(request):
+    user = Profile.objects.filter(user=request.user)[0]
+    data = user.data
+    print request.POST
+    new_item = {'name': request.POST['name'], 'items': request.POST['items[]']}
+    if not 'checklists' in user.data:
+        user.data['checkists'] = {'definitions': [new_item], 'instances': []}
+    else:
+        user.data['checklists'].append(new_item)
+    user.save()
+    user = Profile.objects.filter(user=request.user)[0]
+
+    return JsonResponse(user.data['checklists'], safe=False)

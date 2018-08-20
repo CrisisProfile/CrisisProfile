@@ -1,6 +1,98 @@
 <html>
 <head>
 <title>{{ identity.first_name }} {{ identity.middle_name }} {{ identity.last_name }} {{ identity.birthdate }} | CrisisProfile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js"></script>
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script>
+$(function() {
+  Vue.component('checklist-item', {
+    delimiters: ["{(", ")}"],
+  template: '\
+    <li>\
+      {( title )}\
+      <button v-on:click="$emit(\'remove\')">Remove</button>\
+    </li>\
+  ',
+  props: ['title']
+})
+Vue.component('create-checklist', {
+  delimiters: ["{(", ")}"],
+  data: function () {
+    return {
+      name: '',
+      newTodoText: '', todos: [], nextTodoId: 0
+    }
+  },
+  methods: {
+    createChecklist: function() {
+
+      items = [];
+      for (i=0;i<this.todos.length;i++) {
+        items.push(this.todos[i]['title'])
+      }
+      urlParts = {name: this.name, items: items}
+      console.log(urlParts);
+      this.name = '';
+      this.newTodoText = '';
+      this.todos = [];
+      this.nextTodoId = 0;
+
+      $.post('/api/create_checklist', urlParts, function(data) {
+console.log(JSON.stringify(data))
+      })
+    },
+    addNewTodo: function () {
+      this.todos.push({
+        id: this.nextTodoId++,
+        title: this.newTodoText
+      })
+      this.newTodoText = ''
+    }
+  },
+  template: '<div><strong>Name:</strong> <input v-model="name" />\ <strong>Items:</strong>\
+    <form v-on:submit.prevent="addNewTodo">\
+      <label for="new-todo">Add an item</label>\
+      <input\
+        v-model="newTodoText"\
+        id="new-todo"\
+      >\
+      <button>Add</button>\
+    </form>\
+    <ol>\
+      <li\
+        is="checklist-item"\
+        v-for="(todo, index) in todos"\
+        v-bind:key="todo.id"\
+        v-bind:title="todo.title"\
+        v-on:remove="todos.splice(index, 1)"\
+      ></li>\
+    </ol>\
+    <strong>Triggers:</strong> <ul><li v-for="trigger in [\'daily\']">\
+    <input type="checkbox" /> {( trigger )}</li></ul>\
+    <button v-on:click="createChecklist">Save</button></div>',
+
+})
+  var users_public_uuid = '{{ public_uuid }}';
+    var app = new Vue({
+      delimiters: ["{(", ")}"],
+      el: "#app",
+      data: {
+        users_public_uuid: users_public_uuid,
+        users_have_access_to: []
+      },
+      created: function() {
+        $.get('/api/users_have_access_to', function(data) {
+          app.users_have_access_to = data;
+        })
+      },
+    });
+  });
+</script>
 <style>
 body {
 font:1em/1.4 sans-serif;
@@ -29,9 +121,22 @@ td, th {
 </style>
 </head>
 <body>
+  <div id="app">
+
   <h1><span>CrisisProfile</span> Cordinating the prevention, de-esclation, and long term stablization after a crisis</h1>
   {{ user }}<a href="/logout">Logout</a>
+  <h3>Users you have access to</h3>
+  <ul>
+<li v-if="user.public_uuid != users_public_uuid" v-for="user in users_have_access_to"><a v-bind:href="'/profiles/'+ user.public_uuid">{( user.first_name)} {( user.last_name )}</a></li>
+  </ul>
   <h2>{{ identity.first_name }} {{ identity.middle_name }} {{ identity.last_name }} {{ identity.birthdate }}</h2>
+
+<h3>Checklists</h3>
+<h4>Create new checklist</h4>
+<create-checklist>
+
+</create-checklist>
+
 
 <h3>Status right now</h3>
 <strong>Is permanently housed?</strong> {{ status.is_permanently_housed }} <strong>Where right now?</strong> {{ status.where_right_now }} <strong>Where staying tonight?</strong> {{ status.where_staying_tonight }}
@@ -58,6 +163,6 @@ td, th {
 
   </table>
   <h3>HIPAA release of information forms</h3>
-
+</div>
 </body>
 </html>
