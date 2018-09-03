@@ -187,7 +187,7 @@ Vue.component('thoughts-to-ai-response', {
 template: '<div>\
 <h3>Thoughts to AI responses</h3>\
 <table style="width:100%"><tr><th>Thought phrase</th><th>AI response</th></tr>\
-<tr v-for="phrasesToAIResponse in phrasesToAIResponses"><td>{( phrasesToAIResponse )}<ul><li  v-for="phrase in phrasesToAIResponse.phrases">{( phrasesToAIResponse.phrases )}</li></ul></td><td>{( phrasesToAIResponse.response )}</td></tr>\
+<tr v-for="phrasesToAIResponse in phrasesToAIResponses"><td><ul><li  v-for="phrase in phrasesToAIResponse.phrases">{( phrase.phrase )}</li></ul></td><td>{( phrasesToAIResponse.response )}</td></tr>\
 <tr><td style="width:45%"><ul><li v-for="phrase in phrases"><input v-model="phrase.phrase" type="text" /></li></ul></td><td style="width:50%"><textarea v-model="response"></textarea><button v-on:click="save">Save</button></td></tr>\
 </table> \
 </div>\
@@ -290,8 +290,9 @@ td, th {
 <h3>Checklists</h3>
 <checklists v-bind:checklists="checklists">
 </checklists>
+
 <thoughts-to-ai-response v-bind:phrases-to-a-i-responses="phrasesToAIResponses">
-</thoughs-to-ai-response>
+</thoughts-to-ai-response>
 <h3>Status right now</h3>
 <strong>Is permanently housed?</strong> {{ status.is_permanently_housed }} <strong>Where right now?</strong> {{ status.where_right_now }} <strong>Where staying tonight?</strong> {{ status.where_staying_tonight }}
   <h3>Americans with Disabilities Act alerts</h3>
