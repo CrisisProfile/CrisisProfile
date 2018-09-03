@@ -64,20 +64,51 @@ def api_get_users_have_access_to(request):
     users = [{'first_name': x.other.first_name, 'last_name': x.other.last_name, 'public_uuid': get_public_uuid(x.other)} for x in UserHasAccessTo.objects.filter(user=request.user)]
     return JsonResponse(users, safe=False)
 
-def api_get_profile(request, public_uuid):
+def api_get_profile(request, public_uuid=None):
+    if not public_uuid:
+        public_uuid = Profile.objects.filter(user=request.user)[0].public_uuid
     profile = get_profile_data(public_uuid)
     return JsonResponse(profile, safe=False)
+
+
+def api_save_thought(request):
+    user = Profile.objects.filter(user=request.user)[0]
+    data = user.data
+    import datetime, time
+    datetime_utc = datetime.datetime.utcnow()
+    js_datetime = int(time.mktime(datetime_utc.timetuple())) * 1000
+    new_thought = {'datetime': js_datetime, 'thought': request.POST['thought']}
+    if not 'thoughts' in user.data:
+        user.data['thoughts'] = []
+    user.data['thoughts'].insert(0, new_thought)
+
+    user.save()
+    user = Profile.objects.filter(user=request.user)[0]
+    return JsonResponse(user.data['thoughts'], safe=False)
+
+def api_save_phrases_to_ai_response(request):
+    user = Profile.objects.filter(user=request.user)[0]
+    data = user.data
+    post_data = request.POST
+    new_mapping = {'phrases': json.loads(post_data['phrases']), 'response': post_data['response']}
+    if not 'phrases_to_ai_response' in user.data:
+        user.data['phrases_to_ai_response'] = []
+    user.data['phrases_to_ai_response'].insert(0, new_mapping)
+
+    user.save()
+    user = Profile.objects.filter(user=request.user)[0]
+    print user.data.keys()
+    return JsonResponse(user.data['phrases_to_ai_response'], safe=False)
 
 def api_create_checklist(request):
     user = Profile.objects.filter(user=request.user)[0]
     data = user.data
-    print request.POST
-    new_item = {'name': request.POST['name'], 'items': request.POST['items[]']}
+    new_item = {'name': request.POST['name'], 'items': list(json.loads(request.POST['items'])), 'triggers': list(json.loads(request.POST['triggers']))}
     if not 'checklists' in user.data:
-        user.data['checkists'] = {'definitions': [new_item], 'instances': []}
+        user.data['checklists'] = {'definitions': [new_item], 'instances': []}
     else:
-        user.data['checklists'].append(new_item)
+        user.data['checklists']['definitions'].append(new_item)
+
     user.save()
     user = Profile.objects.filter(user=request.user)[0]
-
     return JsonResponse(user.data['checklists'], safe=False)

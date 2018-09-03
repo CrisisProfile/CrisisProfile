@@ -3,6 +3,7 @@
 <title>{{ identity.first_name }} {{ identity.middle_name }} {{ identity.last_name }} {{ identity.birthdate }} | CrisisProfile</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -10,7 +11,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script>
 $(function() {
-  Vue.component('checklist-item', {
+  Vue.component('checklist-instance-item', {
+    delimiters: ["{(", ")}"],
+  template: '\
+    <li>\
+      <input type="checkbox" /> {( title )} \
+      <template v-if="!is_checked"><strong>Reason for not doing it:</strong> <input type="text" /></template>\
+    </li>\
+  ',
+  props: ['title', 'is_checked']
+  })
+  Vue.component('checklist-instance', {
+    delimiters: ["{(", ")}"],
+  template: '<div><h5>{( name )}</h5>\
+  <ol>\
+  <checklist-instance-item v-bind:title="item" v-bind:is_checked="false" v-for="item in items"></checklist-instance-item>\
+  </ol>\
+  </div>\
+  ',
+  props: ['name', 'items']
+  })
+  Vue.component('checklist-creation-item', {
     delimiters: ["{(", ")}"],
   template: '\
     <li>\
@@ -20,12 +41,50 @@ $(function() {
   ',
   props: ['title']
 })
+Vue.component('checklists', {
+  delimiters: ["{(", ")}"],
+  data: function () {
+    return {}},
+    computed: {
+      dailyChecklists: function() {
+
+              if (!('definitions' in this.checklists)) {
+                return []
+              }
+              dailyChecklists = [];
+              for (var i=0;i <this.checklists['definitions'].length;i++) {
+                console.log(this.checklists['definitions'][i]['triggers'])
+                if ('triggers' in this.checklists['definitions'][i]) {
+                if (this.checklists['definitions'][i]['triggers'].indexOf('daily') > -1) {
+                  dailyChecklists.push(this.checklists['definitions'][i])
+}
+                }
+              }
+              return dailyChecklists;
+
+      }
+    },
+  template: '<div><h4>Create new checklist</h4>\
+  <create-checklist>\
+  </create-checklist>\
+  <h4>Daily Checklists</h4>\
+<checklist-instance v-bind:name="instance.name" v-bind:items="instance.items" v-for="instance in dailyChecklists"></checklist-instance>\
+  </div>',
+  props: ['checklists'],
+  methods: {
+  },
+  created:function() {
+},
+
+
+})
 Vue.component('create-checklist', {
   delimiters: ["{(", ")}"],
   data: function () {
     return {
       name: '',
-      newTodoText: '', todos: [], nextTodoId: 0
+      newTodoText: '', todos: [], nextTodoId: 0,
+      triggers: [{'is_checked': false, 'trigger': 'daily'}]
     }
   },
   methods: {
@@ -35,7 +94,12 @@ Vue.component('create-checklist', {
       for (i=0;i<this.todos.length;i++) {
         items.push(this.todos[i]['title'])
       }
-      urlParts = {name: this.name, items: items}
+      triggers = [];
+      for (i=0;i<this.triggers.length;i++) {
+        if (this.triggers[i]['is_checked']) {           triggers.push(this.triggers[i]['trigger'])
+      }
+      }
+      urlParts = {name: this.name, items: JSON.stringify(items), triggers: JSON.stringify(triggers)}
       console.log(urlParts);
       this.name = '';
       this.newTodoText = '';
@@ -56,7 +120,7 @@ console.log(JSON.stringify(data))
   },
   template: '<div><strong>Name:</strong> <input v-model="name" />\ <strong>Items:</strong>\
     <form v-on:submit.prevent="addNewTodo">\
-      <label for="new-todo">Add an item</label>\
+      <label for="new-todo" @keyup.enter="addNewTodo">Add an item</label>\
       <input\
         v-model="newTodoText"\
         id="new-todo"\
@@ -65,17 +129,78 @@ console.log(JSON.stringify(data))
     </form>\
     <ol>\
       <li\
-        is="checklist-item"\
+        is="checklist-creation-item"\
         v-for="(todo, index) in todos"\
         v-bind:key="todo.id"\
         v-bind:title="todo.title"\
         v-on:remove="todos.splice(index, 1)"\
       ></li>\
     </ol>\
-    <strong>Triggers:</strong> <ul><li v-for="trigger in [\'daily\']">\
-    <input type="checkbox" /> {( trigger )}</li></ul>\
+    <strong>Triggers:</strong> <ul><li v-for="trigger in triggers">\
+    <input type="checkbox" v-model="trigger.is_checked"/> <input v-model="trigger.trigger"></li></ul>\
     <button v-on:click="createChecklist">Save</button></div>',
 
+})
+Vue.component('thought', {
+  delimiters: ["{(", ")}"],
+  computed: {formattedTime: function() {
+    return moment(this.datetime).format()
+  }},
+template: '\
+  <li>\
+    <strong>{( formattedTime )}:</strong> {( thought )}\
+  </li>\
+',
+props: ['thought', 'datetime']
+})
+Vue.component('thoughts', {
+  delimiters: ["{(", ")}"],
+  data: function() {
+    return {'thought': ''}
+  },
+template: '\
+  <div>\
+    <h3>Thoughts</h3>\
+    <input type="text" v-model="thought" @keyup.enter="save" style="width:100%;" placeholder="thought"/>\
+    <button v-on:click="save">Save</button>\
+    <ul>\
+    <thought v-for="thought in thoughts" :key="thought.datetime" v-bind:thought="thought.thought" v-bind:datetime="thought.datetime"></thought></ul>\
+  </div>\
+',
+methods: {
+  save: function() {
+
+    $.post('/api/save_thought', {'thought': this.thought}, function(data) {
+      app.thoughts = data;
+
+    })
+    this.thought = '';
+  }
+},
+props: ['thoughts']
+})
+Vue.component('thoughts-to-ai-response', {
+  delimiters: ["{(", ")}"],
+  data: function() {
+    return {'phrases': [{id: 1, phrase: ''}], response: ''}
+  },
+template: '<div>\
+<h3>Thoughts to AI responses</h3>\
+<table style="width:100%"><tr><th>Thought phrase</th><th>AI response</th></tr>\
+<tr v-for="phrasesToAIResponse in phrasesToAIResponses"><td>{( phrasesToAIResponse )}<ul><li  v-for="phrase in phrasesToAIResponse.phrases">{( phrasesToAIResponse.phrases )}</li></ul></td><td>{( phrasesToAIResponse.response )}</td></tr>\
+<tr><td style="width:45%"><ul><li v-for="phrase in phrases"><input v-model="phrase.phrase" type="text" /></li></ul></td><td style="width:50%"><textarea v-model="response"></textarea><button v-on:click="save">Save</button></td></tr>\
+</table> \
+</div>\
+',
+methods: {
+  save: function() {
+    $.post('/api/save_phrases_to_ai_response', {'phrases': JSON.stringify(this.phrases), 'response': this.response}, function(data) {
+      app.phrasesToAIResponses = data;
+
+    })
+  }
+},
+props: ['phrasesToAIResponses']
 })
   var users_public_uuid = '{{ public_uuid }}';
     var app = new Vue({
@@ -83,11 +208,36 @@ console.log(JSON.stringify(data))
       el: "#app",
       data: {
         users_public_uuid: users_public_uuid,
-        users_have_access_to: []
+        users_have_access_to: [],
+        checklists: {},
+        thoughts: [],
+        phrasesToAIResponses: [],
+      },
+      computed: {
+        doesUserHaveAccessToAnyOtherUsers: function() {
+          for (var i=0;i<this.users_have_access_to;i++) {
+            if (this.users_have_access_to[i].public_uuid != this.users_public_uuid) {
+              return true
+            }
+          }
+          return false
+        }
       },
       created: function() {
         $.get('/api/users_have_access_to', function(data) {
           app.users_have_access_to = data;
+        })
+        $.get('/api/profile', function(data) {
+          if ('checklists' in data) {
+            app.checklists = data.checklists;
+          }
+          if ('thoughts' in data) {
+            app.thoughts = data.thoughts;
+
+          }
+          if ('phrases_to_ai_response' in data) {
+            app.phrasesToAIResponses = data.phrases_to_ai_response;
+          }
         })
       },
     });
@@ -99,7 +249,9 @@ font:1em/1.4 sans-serif;
 }
 h1 {
   background:#FF69B4;
-
+padding:10px;
+color:#FFF;
+font-size:1.25em;
 }
 h3, p {
   clear:both;
@@ -118,26 +270,28 @@ td, th {
   text-align:left;
   vertical-align:top;
 }
+#content {
+  padding:10px;
+}
 </style>
 </head>
 <body>
   <div id="app">
 
-  <h1><span>CrisisProfile</span> Cordinating the prevention, de-esclation, and long term stablization after a crisis</h1>
-  {{ user }}<a href="/logout">Logout</a>
-  <h3>Users you have access to</h3>
+  <h1>CrisisProfile</h1>
+  <div id="content">
+  <a href="/logout">Logout</a>
+  <h3 v-if="doesUserHaveAccessToAnyOtherUsers">Users you have access to</h3>
   <ul>
 <li v-if="user.public_uuid != users_public_uuid" v-for="user in users_have_access_to"><a v-bind:href="'/profiles/'+ user.public_uuid">{( user.first_name)} {( user.last_name )}</a></li>
   </ul>
   <h2>{{ identity.first_name }} {{ identity.middle_name }} {{ identity.last_name }} {{ identity.birthdate }}</h2>
-
+<thoughts v-bind:thoughts="thoughts"></thoughts>
 <h3>Checklists</h3>
-<h4>Create new checklist</h4>
-<create-checklist>
-
-</create-checklist>
-
-
+<checklists v-bind:checklists="checklists">
+</checklists>
+<thoughts-to-ai-response v-bind:phrases-to-a-i-responses="phrasesToAIResponses">
+</thoughs-to-ai-response>
 <h3>Status right now</h3>
 <strong>Is permanently housed?</strong> {{ status.is_permanently_housed }} <strong>Where right now?</strong> {{ status.where_right_now }} <strong>Where staying tonight?</strong> {{ status.where_staying_tonight }}
   <h3>Americans with Disabilities Act alerts</h3>
@@ -163,6 +317,7 @@ td, th {
 
   </table>
   <h3>HIPAA release of information forms</h3>
+</div>
 </div>
 </body>
 </html>

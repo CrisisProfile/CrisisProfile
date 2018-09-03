@@ -23,8 +23,11 @@ urlpatterns = [
     url(r'^$', views.homepage),
     url(r'^profiles/(?P<public_uuid>[0-9a-f-]+)/', views.get_profile),
     url(r'^api/profiles/(?P<public_uuid>[0-9a-f-]+)/', views.api_get_profile),
+    url(r'^api/profile', views.api_get_profile),
     url(r'^api/users_have_access_to', views.api_get_users_have_access_to),
     url(r'^', include('django.contrib.auth.urls', namespace='auth')),
     url(r'^', include('social_django.urls', namespace='social')),
-    url(r'^api/create_checklist', views.api_create_checklist)
+    url(r'^api/create_checklist', views.api_create_checklist),
+    url(r'^api/save_thought', views.api_save_thought),
+    url(r'^api/save_phrases_to_ai_response', views.api_save_phrases_to_ai_response),
 ]
