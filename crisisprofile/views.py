@@ -80,6 +80,11 @@ def api_save_thought(request):
     new_thought = {'datetime': js_datetime, 'thought': request.POST['thought']}
     if not 'thoughts' in user.data:
         user.data['thoughts'] = []
+    if 'phrases_to_ai_response' in user.data:
+        for response_group in user.data['phrases_to_ai_response']:
+            for phrase in response_group['phrases']:
+                if phrase['phrase'] in request.POST['thought'].lower():
+                    new_thought['automatic_response'] = response_group['response']
     user.data['thoughts'].insert(0, new_thought)
 
     user.save()
@@ -93,6 +98,7 @@ def api_save_phrases_to_ai_response(request):
     new_mapping = {'phrases': json.loads(post_data['phrases']), 'response': post_data['response']}
     if not 'phrases_to_ai_response' in user.data:
         user.data['phrases_to_ai_response'] = []
+
     user.data['phrases_to_ai_response'].insert(0, new_mapping)
 
     user.save()

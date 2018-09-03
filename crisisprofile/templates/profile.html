@@ -149,9 +149,10 @@ Vue.component('thought', {
 template: '\
   <li>\
     <strong>{( formattedTime )}:</strong> {( thought )}\
+    <template v-if="automatic_response"><strong>Automatic response</strong> {( automatic_response )}</template>\
   </li>\
 ',
-props: ['thought', 'datetime']
+props: ['thought', 'datetime', 'automatic_response']
 })
 Vue.component('thoughts', {
   delimiters: ["{(", ")}"],
@@ -164,7 +165,7 @@ template: '\
     <input type="text" v-model="thought" @keyup.enter="save" style="width:100%;" placeholder="thought"/>\
     <button v-on:click="save">Save</button>\
     <ul>\
-    <thought v-for="thought in thoughts" :key="thought.datetime" v-bind:thought="thought.thought" v-bind:datetime="thought.datetime"></thought></ul>\
+    <thought v-for="thought in thoughts" :key="thought.datetime" v-bind:thought="thought.thought" v-bind:datetime="thought.datetime" v-bind:automatic_response="thought.automatic_response"></thought></ul>\
   </div>\
 ',
 methods: {
