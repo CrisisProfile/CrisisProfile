@@ -150,10 +150,12 @@ Vue.component('thought', {
     return moment(this.datetime).format()
   },autoresponse: function() {
     return '<strong>Automatic response:</strong> '+ this.linkify(this.automatic_response)
+  },linkified_thought: function() {
+    return this.linkify(this.thought)
   }},
 template: '\
   <li>\
-    <strong>{( formattedTime )}:</strong> {( thought )}\
+    <strong>{( formattedTime )}:</strong> <span v-html="linkified_thought"></span>\
     <span v-if="automatic_response" v-html="autoresponse"> </span>\
   </li>\
 ',
