@@ -8,7 +8,6 @@ from crisisprofile.models import Profile, UserHasAccessTo
 
 def ensure_profile_exists(user):
     profile_query = Profile.objects.filter(user=user)
-    print(profile_query)
     if not profile_query:
         profile = Profile(user=user, data={})
         profile.save()
@@ -83,7 +82,7 @@ def api_save_thought(request):
     if 'phrases_to_ai_response' in user.data:
         for response_group in user.data['phrases_to_ai_response']:
             for phrase in response_group['phrases']:
-                if phrase['phrase'] in request.POST['thought'].lower():
+                if phrase['phrase'].lower() in request.POST['thought'].lower():
                     new_thought['automatic_response'] = response_group['response']
     user.data['thoughts'].insert(0, new_thought)
 
@@ -118,3 +117,14 @@ def api_create_checklist(request):
     user.save()
     user = Profile.objects.filter(user=request.user)[0]
     return JsonResponse(user.data['checklists'], safe=False)
+
+def update_identity(request):
+    user = Profile.objects.filter(user=request.user)[0]
+    data = user.data
+    if not 'identity' in data:
+        data['identity'] = {}
+    if 'first_name' in request.POST:
+        first_name = request.POST['first_name']
+        data['identity']['first_name'] = first_name
+    user.data = data
+    user.save()
